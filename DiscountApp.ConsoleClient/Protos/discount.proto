@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "DiscountApp.ConsoleClient";
+
+package DiscountApp;
+
+// The DiscountApp service definition.
+service DiscountApp {
+  rpc Generate (GenerateRequest) returns (GenerateReply);
+  rpc UseCode (UseCodeRequest) returns (UseCodeReply);
+}
+
+message GenerateRequest {
+    int32 count = 1;
+    int32 length = 2;
+}
+message GenerateReply {
+  bool result =  1;
+} 
+
+message UseCodeRequest {
+    string code = 1;
+}
+message UseCodeReply {
+    bool result = 1;
+}
+
