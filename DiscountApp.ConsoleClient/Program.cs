@@ -9,9 +9,12 @@ public class Program
     {
         using var channel = GrpcChannel.ForAddress("http://localhost:5185");
         var client = new DiscountApp.DiscountAppClient(channel);
-        var reply = await client.GenerateAsync(
-                          new GenerateRequest { Count = 1, Length = 2 });
-        Console.WriteLine("Greeting: " + reply.Result);
+        //var reply = await client.GenerateAsync(new GenerateRequest { Count = 1000, Length = 8 });
+
+        var reply = await client.UseCodeAsync(new UseCodeRequest{
+            Code = "df087af5"
+        });
+        Console.WriteLine("reply is " + reply.Result);
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
     }
