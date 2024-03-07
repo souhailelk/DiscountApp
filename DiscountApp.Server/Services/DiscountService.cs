@@ -38,18 +38,22 @@ public class DiscountService : DiscountApp.DiscountAppBase
     }
     public override async Task<UseCodeReply> UseCode(UseCodeRequest request, ServerCallContext context)
     {
+        _logger.LogInformation($"new UseCode request code={request.Code} ");
         bool discountCodeExists = await discountCodeController.DiscountCodeExists(new DiscountCode(request.Code, false)).ConfigureAwait(false);
         if (!discountCodeExists)
             return await Task.FromResult(new UseCodeReply
             {
                 Result = UseCodeResponse.Doesnotexist
             });
+        _logger.LogInformation($"new UseCode request code={request.Code}, the code  exists!");
         var discountCode = await discountCodeController.GetDiscountCode(new DiscountCode(request.Code, false)).ConfigureAwait(false);
         if (discountCode.IsUsed)
             return await Task.FromResult(new UseCodeReply
             {
                 Result = UseCodeResponse.Used
             });
+
+        _logger.LogInformation($"new UseCode request code={request.Code}, the code isn't used!");
         discountCode.IsUsed = true;
         await discountCodeController.UseDiscountCode(discountCode).ConfigureAwait(false);
         return await Task.FromResult(new UseCodeReply
