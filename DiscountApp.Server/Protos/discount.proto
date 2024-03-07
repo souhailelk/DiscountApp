@@ -10,6 +10,13 @@ service DiscountApp {
   rpc UseCode (UseCodeRequest) returns (UseCodeReply);
 }
 
+enum UseCodeResponse
+{   // whatever contents...
+    SUCCESS = 0;
+    DOESNOTEXIST = 1;
+    USED = 2;
+}
+
 message GenerateRequest {
     int32 count = 1;
     int32 length = 2;
@@ -22,6 +29,6 @@ message UseCodeRequest {
     string code = 1;
 }
 message UseCodeReply {
-    int32 result = 1;
+  UseCodeResponse result = 1;
 }
 

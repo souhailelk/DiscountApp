@@ -30,7 +30,7 @@ public class DiscountService : DiscountApp.DiscountAppBase
         foreach (var code in codes)
         {
             _logger.LogInformation(code.Code);
-            if (discountCodeController.DiscountCodeExists(code)) existingCode++;
+            if (await discountCodeController.DiscountCodeExists(code).ConfigureAwait(false)) existingCode++;
             else await discountCodeController.SaveDiscountCode(code).ConfigureAwait(false);
         }
         return await Task.FromResult(new GenerateReply
@@ -40,22 +40,22 @@ public class DiscountService : DiscountApp.DiscountAppBase
     }
     public override async Task<UseCodeReply> UseCode(UseCodeRequest request, ServerCallContext context)
     {
-        if (!discountCodeController.DiscountCodeExists(new DiscountCode(request.Code, false)))
+        if (!await discountCodeController.DiscountCodeExists(new DiscountCode(request.Code, false)).ConfigureAwait(false))
             return await Task.FromResult(new UseCodeReply
             {
-                Result = 1
+                Result = UseCodeResponse.Doesnotexist
             });
         var discountCode = await discountCodeController.GetDiscountCode(new DiscountCode(request.Code, false)).ConfigureAwait(false);
         if (discountCode.IsUsed)
             return await Task.FromResult(new UseCodeReply
             {
-                Result = 2
+                Result = UseCodeResponse.Used
             });
         discountCode.IsUsed = true;
         await discountCodeController.UseDiscountCode(discountCode).ConfigureAwait(false);
         return await Task.FromResult(new UseCodeReply
-            {
-                Result = 0
-            });
+        {
+            Result = UseCodeResponse.Success
+        });
     }
 }

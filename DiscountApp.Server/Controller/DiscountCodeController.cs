@@ -26,7 +26,11 @@ public class DiscountCodeController
     }
     public async Task<DiscountCode> GetDiscountCode(DiscountCode dcode)
     {
-        return (context.DiscountCodes?.Where(e => e.Equals(dcode))).FirstOrDefault();
+        if (context.DiscountCodes == null)
+        {
+            throw new Exception("Could not find DiscountCodes table in db");
+        }
+        return await context.DiscountCodes.Where(e => e.Equals(dcode)).FirstAsync().ConfigureAwait(false);
     }
 
     public async Task UseDiscountCode(DiscountCode dcode)
@@ -39,7 +43,7 @@ public class DiscountCodeController
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!DiscountCodeExists(dcode))
+            if (!await DiscountCodeExists(dcode).ConfigureAwait(false))
             {
                 throw new Exception($"Could not find the code {dcode.Code} in DB");
             }
@@ -59,8 +63,12 @@ public class DiscountCodeController
         await context.SaveChangesAsync().ConfigureAwait(false);
         return dcode;
     }
-    public bool DiscountCodeExists(DiscountCode dcode)
+    public async Task<bool> DiscountCodeExists(DiscountCode dcode)
     {
-        return (context.DiscountCodes?.Any(e => e.Equals(dcode))).GetValueOrDefault();
+         if (context.DiscountCodes == null)
+        {
+            throw new Exception("Could not find DiscountCodes table in db");
+        }
+        return await context.DiscountCodes.Where(e => e.Equals(dcode)).AnyAsync().ConfigureAwait(false);
     }
 }
