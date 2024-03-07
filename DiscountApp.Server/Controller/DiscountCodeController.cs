@@ -71,4 +71,12 @@ public class DiscountCodeController
         }
         return await context.DiscountCodes.Where(e => e.Equals(dcode)).AnyAsync().ConfigureAwait(false);
     }
+
+    public async Task<bool> SaveDiscountCodeIfItDontExist(DiscountCode dcode)
+    {
+        if(await DiscountCodeExists(dcode).ConfigureAwait(false))
+            return false;
+        await SaveDiscountCode(dcode).ConfigureAwait(false);
+        return true;
+    }
 }

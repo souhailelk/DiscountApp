@@ -14,7 +14,6 @@ public class DiscountService : DiscountApp.DiscountAppBase
     private readonly DiscountCodeGenertor codeGenerator;
     private readonly DiscountCodeController discountCodeController;
     private readonly DiscountCodeContext context;
-
     public DiscountService(ILogger<DiscountService> logger)
     {
         _logger = logger;
@@ -25,13 +24,12 @@ public class DiscountService : DiscountApp.DiscountAppBase
 
     public override async Task<GenerateReply> Generate(GenerateRequest request, ServerCallContext context)
     {
+        _logger.LogInformation($"new Generate request count={request.Count}, length={request.Length} ");
         var codes = codeGenerator.Generate(request.Count, request.Length);
         var existingCode = 0;
         foreach (var code in codes)
         {
-            _logger.LogInformation(code.Code);
-            if (await discountCodeController.DiscountCodeExists(code).ConfigureAwait(false)) existingCode++;
-            else await discountCodeController.SaveDiscountCode(code).ConfigureAwait(false);
+            if (await discountCodeController.SaveDiscountCodeIfItDontExist(code).ConfigureAwait(false)) existingCode++;
         }
         return await Task.FromResult(new GenerateReply
         {
@@ -40,7 +38,8 @@ public class DiscountService : DiscountApp.DiscountAppBase
     }
     public override async Task<UseCodeReply> UseCode(UseCodeRequest request, ServerCallContext context)
     {
-        if (!await discountCodeController.DiscountCodeExists(new DiscountCode(request.Code, false)).ConfigureAwait(false))
+        bool discountCodeExists = await discountCodeController.DiscountCodeExists(new DiscountCode(request.Code, false)).ConfigureAwait(false);
+        if (!discountCodeExists)
             return await Task.FromResult(new UseCodeReply
             {
                 Result = UseCodeResponse.Doesnotexist
