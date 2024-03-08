@@ -1,7 +1,9 @@
 using DiscountApp.Server.Controller;
 using DiscountApp.Servrer.Models;
 using Grpc.Core;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscountApp.Server.Services;
@@ -62,5 +64,15 @@ public class DiscountService : DiscountApp.DiscountAppBase
         {
             Result = UseCodeResponse.Success
         });
+    }
+    public override async Task<GetUnusedCodesReply> GetUnusedCodes(GetUnusedCodesRequest request, ServerCallContext context)
+    {
+        logger.LogInformation($"Get unused codes count={request.Count} ");
+        var codes = (await discountCodeController.GetUnusedDiscountCodes().ConfigureAwait(false)).ToList();
+        if (request.Count > codes.Count)
+            throw new RpcException(new Status(StatusCode.Unavailable, "There is no enough unused code, try generate new codes!"));
+        var reply = new GetUnusedCodesReply();
+        reply.Codes.AddRange(codes.Select( c => c.Code));
+        return await Task.FromResult(reply);
     }
 }

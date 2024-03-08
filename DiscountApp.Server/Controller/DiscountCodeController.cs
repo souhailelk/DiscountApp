@@ -75,4 +75,13 @@ public class DiscountCodeController : IDiscountCodeController
         await SaveDiscountCode(dcode).ConfigureAwait(false);
         return true;
     }
+
+    public async Task<IEnumerable<DiscountCode>> GetUnusedDiscountCodes()
+    {
+        if (context.DiscountCodes == null)
+        {
+            throw new Exception("Could not find DiscountCodes table in db");
+        }
+        return await context.DiscountCodes.Where( code => code.IsUsed == false).ToListAsync();
+    }
 }
