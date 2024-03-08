@@ -7,15 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscountApp.Server.Controller;
-
-public class DiscountCodeController
+public class DiscountCodeController : IDiscountCodeController
 {
     private readonly DiscountCodeContext context;
     public DiscountCodeController(DiscountCodeContext context)
     {
         this.context = context;
     }
-
     public async Task<IEnumerable<DiscountCode>> GetDiscountCodes()
     {
         if (context.DiscountCodes == null)
@@ -32,7 +30,6 @@ public class DiscountCodeController
         }
         return await context.DiscountCodes.Where(e => e.Equals(dcode)).FirstAsync().ConfigureAwait(false);
     }
-
     public async Task UseDiscountCode(DiscountCode dcode)
     {
 
@@ -71,7 +68,6 @@ public class DiscountCodeController
         }
         return await context.DiscountCodes.Where(e => e.Equals(dcode)).AnyAsync().ConfigureAwait(false);
     }
-
     public async Task<bool> SaveDiscountCodeIfItDontExist(DiscountCode dcode)
     {
         if(await DiscountCodeExists(dcode).ConfigureAwait(false))
