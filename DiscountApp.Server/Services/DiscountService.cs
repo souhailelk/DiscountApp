@@ -1,7 +1,7 @@
 using DiscountApp.Server.Controller;
 using DiscountApp.Servrer.Models;
 using Grpc.Core;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ public class DiscountService : DiscountApp.DiscountAppBase
     private readonly ILogger<DiscountService> logger;
     private readonly IDiscountCodeGeneretor codeGenerator;
     private readonly IDiscountCodeController discountCodeController;
+    [ActivatorUtilitiesConstructor]
     public DiscountService(ILogger<DiscountService> logger)
     {
         this.logger = logger;
@@ -72,7 +73,7 @@ public class DiscountService : DiscountApp.DiscountAppBase
         if (request.Count > codes.Count)
             throw new RpcException(new Status(StatusCode.Unavailable, "There is no enough unused code, try generate new codes!"));
         var reply = new GetUnusedCodesReply();
-        reply.Codes.AddRange(codes.Select( c => c.Code));
+        reply.Codes.AddRange(codes.Select( c => c.Code).Take(request.Count));
         return await Task.FromResult(reply);
     }
 }
